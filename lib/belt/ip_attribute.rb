@@ -2,13 +2,22 @@
 # Include this module to auto-magically convert IP addresses into decimals.
 #
 
+#   include IpAttribute
+#
+# Adds instance method .to_ip to String, Numeric and including classes.
+
 module IpAttribute
+# * TODO: provide machina to disable automagically converting specified attrs
+# * TODO: provide machina to specify attrs to be converted automagically
+# * TODO: support DataMapper
+
 module ClassMethods
-  def install_ip_attribute_hook
+  def install_ip_attribute_hook #:nodoc:
     before_validation :set_ip
 
     # IP attributes must be numeric or nil
-    # Override the allow_nil with validates_presence_of in the calling klass
+    # :allow_nil can be overridden validates_presence_of in the calling klass
+
     self.new.attributes.keys.select{|c|c.match(/^.*_ip$/)}.each {|k|
       validates_numericality_of k.to_sym, :only_integer => true, :allow_nil => true, :greater_than_or_equal_to => 0, :less_than_or_equal_to => (2**128)-1
     }
@@ -16,19 +25,23 @@ module ClassMethods
   end
 end
 
-def self.included( klass )
+def self.included( klass ) #:nodoc:
   klass.extend ClassMethods
+
+  # Only extend non-AR classes
   return unless klass.ancestors.include?(ActiveRecord::Base)
 
+  # ensure there is at least one _ip attribute
   ip_attributes = klass.new.attributes.keys.select{|c|c.match(/^.*_ip$/)}
   ip_methods    = klass.new.methods.select{|c|c.match(/^.*_ip$/)}
-
   raise(RuntimeError,"unused include - #{klass.class.to_s} does not have any attributes ending in _ip") if ip_attributes.empty? && ip_methods.empty?
 
+  # assign validations and setup to_i conversion
   klass.install_ip_attribute_hook
+
   ip_attributes.each do |k|
 
-    # type cast the _ip= attribute reader
+    # typecast the _ip attribute reader
     define_method("#{k}") {
       ip = self.send("#{k}_before_type_cast")
       return if ip.nil?
@@ -40,7 +53,7 @@ def self.included( klass )
       ip
     }
 
-    # type cast the _ip= attribute writer
+    # typecast the _ip= attribute writer
     define_method("#{k}=") {|addr|
       self[k] = self.to_ip(addr)
     }
@@ -48,7 +61,13 @@ def self.included( klass )
 
 end
 
-def set_ip
+# :call-seq:
+#   before_validation :set_ip
+#
+# converts all attributes ending with _ip to integers
+# This may no longer be necessary
+
+def set_ip #:nodoc:
   ip_attributes = self.class.new.attributes.keys.select{|c|c.match(/^.*_ip$/)}
   ip_attributes.each do |k|
       self[k] = self.class.to_ip(self.send(k))
@@ -61,7 +80,7 @@ end
 # This function converts anything IPAddr can parse into an integer.
 #
 # == Arguments
-# <tt>string</tt>:: A string
+# <tt>string</tt>:: Something IPAddr can parse, commonly a string
 
 def to_ip(addr = self)
   if addr.nil?
