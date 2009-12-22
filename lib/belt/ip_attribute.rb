@@ -13,7 +13,6 @@ module IpAttribute
 
 module ClassMethods
   def install_ip_attribute_hook #:nodoc:
-    before_validation :set_ip
 
     # IP attributes must be numeric or nil
     # :allow_nil can be overridden validates_presence_of in the calling klass
@@ -45,33 +44,28 @@ def self.included( klass ) #:nodoc:
     define_method("#{k}") {
       ip = self.send("#{k}_before_type_cast")
       return if ip.nil?
-      if ip.to_i <= 2**32-1
-        ip = IPAddr.new(ip.to_i, Socket::AF_INET)
-      else
-        ip = IPAddr.new(ip.to_i, Socket::AF_INET6)
+      begin
+        if ip.to_i <= 2**32-1
+          ip = IPAddr.new(ip.to_i, Socket::AF_INET)
+        else
+          ip = IPAddr.new(ip.to_i, Socket::AF_INET6)
+        end
+      rescue ArgumentError => e
       end
       ip
     }
 
     # typecast the _ip= attribute writer
     define_method("#{k}=") {|addr|
-      self[k] = self.to_ip(addr)
+      begin
+        write_attribute(k,self.to_ip(addr))
+      rescue ArgumentError => e
+        self.errors.add(k)
+        raise ActiveRecord::RecordInvalid, self
+      end
     }
   end
 
-end
-
-# :call-seq:
-#   before_validation :set_ip
-#
-# converts all attributes ending with _ip to integers
-# This may no longer be necessary
-
-def set_ip #:nodoc:
-  ip_attributes = self.class.new.attributes.keys.select{|c|c.match(/^.*_ip$/)}
-  ip_attributes.each do |k|
-      self[k] = self.class.to_ip(self.send(k))
-  end
 end
 
 # :call-seq:
@@ -88,11 +82,7 @@ def to_ip(addr = self)
   elsif addr.to_s.match(/^\d+$/)
     ip = addr.to_i
   else
-    begin
-      ip = IPAddr.new(addr.to_s).to_i
-    rescue ArgumentError
-      ip = nil
-    end
+    ip = IPAddr.new(addr.to_s).to_i
   end
   ip
 end
