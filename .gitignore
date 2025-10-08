@@ -1,1 +1,21 @@
-rdoc
+# Gem build artifacts
+*.gem
+pkg/
+Gemfile.lock
+
+# Coverage
+coverage/
+
+# RubyCritic reports
+tmp/rubycritic/
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+
+# Ruby
+tmp/
+rdoc/
