@@ -1,0 +1,27 @@
+// IP address family constants by operating system.
+//
+// AF_INET (IPv4) is universally 2 across all POSIX systems.
+// AF_INET6 (IPv6) varies by kernel — values from sys/socket.h.
+//
+// This file is loaded ONLY when the runtime OS is not in the
+// hardcoded lookup (linux/macos/freebsd/openbsd/netbsd).
+// Add new OS entries here without touching Ruby code.
+//
+// Sources:
+//   Linux:   include/linux/socket.h (AF_INET6 = 10)
+//   macOS:   sys/socket.h (AF_INET6 = 30)
+//   FreeBSD: sys/socket.h (AF_INET6 = 28)
+//   OpenBSD: sys/socket.h (AF_INET6 = 24)
+//   NetBSD:  sys/socket.h (AF_INET6 = 24)
+//   Windows: winsock2.h   (AF_INET6 = 23)
+//   Solaris: sys/socket.h (AF_INET6 = 26)
+//   AIX:     sys/socket.h (AF_INET6 = 24)
+//   HP-UX:   sys/socket.h (AF_INET6 = 22)
+{
+  "af_inet": 2,
+  "af_inet6_by_os": {
+    "solaris": 26,
+    "aix":     24,
+    "hpux":    22
+  }
+}
