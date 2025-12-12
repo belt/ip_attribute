@@ -1,0 +1,22 @@
+# mise.toml — ip_attribute gem
+# Project-scoped tool versions and environment
+min_version = "2025.1.0"
+
+[tools]
+ruby = "3.4.9"
+
+[env]
+# Force Apple Clang for Ruby builds — Homebrew LLVM lacks
+# RUBY_FUNCTION_NAME_STRING, causing vm_callinfo.h failures
+CC = "/usr/bin/clang"
+CXX = "/usr/bin/clang++"
+
+# frozen_string_literal enforced per-file via pragma (not RUBYOPT).
+# RUBYOPT=--enable=frozen-string-literal breaks gems that don't
+# declare the pragma (e.g., rantly). Our files all have the pragma.
+
+# jemalloc tuning (optimal for Ruby workloads)
+# dirty_decay_ms:1000 — balance memory/performance (vs 0 = aggressive return)
+# narenas:2 — GVL means fewer arenas suffice
+# background_thread:true omitted — not supported on macOS (pthread-only)
+MALLOC_CONF = "dirty_decay_ms:1000,narenas:2"
