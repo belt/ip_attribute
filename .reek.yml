@@ -1,0 +1,37 @@
+---
+# Reek configuration — code smell detection
+
+exclude_paths:
+  - spec
+  - lib/generators
+
+detectors:
+  TooManyStatements:
+    max_statements: 8
+
+  NestedIterators:
+    exclude:
+      - "IpAttribute::ActiveRecordIntegration"
+
+  UtilityFunction:
+    exclude:
+      - "IpAttribute::Converter"
+      - "IpAttribute::AddressFamily"
+
+  UnusedPrivateMethod:
+    enabled: false
+
+  BooleanParameter:
+    exclude:
+      - "IpAttribute::Converter#to_integer"
+      - "IpAttribute::Converter#to_ipaddr"
+      - "IpAttribute::Type#initialize"
+
+  # ActiveModel::Type methods inherently check nil and delegate
+  FeatureEnvy:
+    exclude:
+      - "IpAttribute::Type"
+
+  NilCheck:
+    exclude:
+      - "IpAttribute::Type"

@@ -1,31 +1,42 @@
-require 'pathname'
-require 'rake'
-require 'rake/testtask'
-require 'rake/rdoctask'
+# frozen_string_literal: true
 
-DIR = Pathname.new(File.dirname(__FILE__))
-desc 'Default: run unit tests.'
-task :default => :test
+require "bundler/gem_tasks"
 
-desc 'Test the ip_attribute plugin.'
-Rake::TestTask.new(:test) do |t|
-  t.libs << 'lib'
-  t.libs << 'test'
-  t.pattern = 'test/**/*_test.rb'
-  t.verbose = true
+begin
+  require "rspec/core/rake_task"
+  RSpec::Core::RakeTask.new(:spec) do |t|
+    t.rspec_opts = "--tag ~fuzz"
+  end
+
+  RSpec::Core::RakeTask.new(:fuzz) do |t|
+    t.rspec_opts = "--tag fuzz"
+  end
+rescue LoadError
+  # rspec not available
 end
 
-desc 'Generate documentation for the ip_attribute plugin.'
-Rake::RDocTask.new(:rdoc) do |rdoc|
-  rdoc.rdoc_dir = 'rdoc'
-  rdoc.title    = 'IpAttribute'
-  rdoc.options << '--line-numbers' << '--inline-source'
-  rdoc.rdoc_files.include('README')
-  rdoc.rdoc_files.include('lib/**/*.rb')
+begin
+  require "standard/rake"
+rescue LoadError
+  # standard not available
 end
 
-desc 'Remove old sqlite file.'
-task :refresh_db do
-  `rm -f #{File.dirname(__FILE__)}/test/acts_as_ip.sqlite3`
+desc "Run reek code smell detection"
+task :reek do
+  sh "bundle exec reek lib/"
 end
 
+desc "Run rubycritic quality report"
+task :quality do
+  sh "bundle exec rubycritic --no-browser lib/"
+end
+
+desc "Run bundler-audit security check"
+task :audit do
+  sh "bundle exec bundler-audit check --update"
+end
+
+desc "Run all checks (spec + lint + reek + audit)"
+task ci: %i[spec standard reek audit]
+
+task default: :spec
