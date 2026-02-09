@@ -1,0 +1,30 @@
+# Compose for ip_attribute gem CI.
+#
+# Usage:
+#   docker compose run --rm test
+#   AR_VERSION=7.2 RUBY_VERSION=3.4.9 docker compose run --rm test
+---
+services:
+  test:
+    build:
+      context: .
+      args:
+        RUBY_VERSION: "${RUBY_VERSION:-3.4.9}"
+        AR_VERSION: "${AR_VERSION:-}"
+    image: "ip_attribute:test-ruby${RUBY_VERSION:-3.4.9}-ar${AR_VERSION:-latest}"
+    environment:
+      AR_VERSION: "${AR_VERSION:-}"
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,noexec,nosuid
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_swappiness: 0
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 512M
+          pids: 128
