@@ -17,6 +17,7 @@ group :development do
 
   # Code quality (combined: reek + flay + flog)
   gem "rubycritic", "~> 4.9", require: false
+  gem "ostruct", ">= 0.6", require: false  # rubycritic → virtus dep, removed from stdlib in Ruby 4.0
 
   # Code smell detection (standalone, also used by rubycritic)
   gem "reek", "~> 6.5", require: false
