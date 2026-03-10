@@ -1,0 +1,67 @@
+class <%= migration_class_name %> < ActiveRecord::Migration[<%= ActiveRecord::Migration.current_version %>]
+  disable_ddl_transaction!
+
+  def change
+<% normalized_columns.each do |col| -%>
+    add_column :<%= table_name %>, :<%= col %>, :decimal, precision: 39, scale: 0
+<% if add_family? -%>
+    add_column :<%= table_name %>, :<%= col %>_family, :integer, limit: 1
+<% end -%>
+<% end -%>
+
+    # B-tree indexes for exact lookups and range (subnet) queries.
+    # Partial index excludes NULLs — saves space on nullable columns.
+<% normalized_columns.each do |col| -%>
+    add_index :<%= table_name %>, :<%= col %>,
+      where: "<%= col %> IS NOT NULL",
+      name: "idx_<%= table_name %>_<%= col %>_present",
+      **concurrent_options
+<% if add_family? -%>
+
+    # Conditional index per family — accelerates "all IPv4" or "all IPv6" queries.
+    # Common in DNS servers, access control, and geolocation lookups.
+    add_index :<%= table_name %>, :<%= col %>,
+      where: "<%= col %>_family = 4",
+      name: "idx_<%= table_name %>_<%= col %>_v4",
+      **concurrent_options
+
+    add_index :<%= table_name %>, :<%= col %>,
+      where: "<%= col %>_family = 6",
+      name: "idx_<%= table_name %>_<%= col %>_v6",
+      **concurrent_options
+<% end -%>
+<% end -%>
+
+    # Range + family constraints (RFC 791 / RFC 4291).
+<% normalized_columns.each do |col| -%>
+    add_check_constraint :<%= table_name %>,
+      "<%= col %> >= 0 AND <%= col %> <= 340282366920938463463374607431768211455",
+      name: "chk_<%= col %>_range",
+      **validate_options
+<% if add_family? -%>
+
+    # 4 = IPv4 (RFC 791), 6 = IPv6 (RFC 4291)
+    add_check_constraint :<%= table_name %>,
+      "<%= col %>_family IN (4, 6)",
+      name: "chk_<%= col %>_family_valid",
+      **validate_options
+<% end -%>
+<% end -%>
+  end
+
+  private
+
+  def concurrent_options
+    opts = { if_not_exists: true }
+    opts[:algorithm] = :concurrently if postgresql?
+    opts
+  end
+
+  def validate_options
+    postgresql? ? { validate: false } : {}
+  end
+
+  def postgresql?
+    connection.adapter_name == "PostgreSQL"
+  end
+end

@@ -1,0 +1,55 @@
+class <%= migration_class_name %> < ActiveRecord::Migration[<%= ActiveRecord::Migration.current_version %>]
+  disable_ddl_transaction!
+
+  def change
+<% prefixes.each do |prefix| -%>
+    add_column :<%= table_name %>, :<%= prefix %>_ipv4, :bigint
+    add_column :<%= table_name %>, :<%= prefix %>_ipv6, :decimal, precision: 39, scale: 0
+<% end -%>
+
+    # B-tree indexes for exact lookups and range (subnet) queries.
+    # Partial indexes exclude NULLs — significant space savings on
+    # sparse dual-stack columns where most rows have only one family.
+<% prefixes.each do |prefix| -%>
+    add_index :<%= table_name %>, :<%= prefix %>_ipv4,
+      where: "<%= prefix %>_ipv4 IS NOT NULL",
+      name: "idx_<%= table_name %>_<%= prefix %>_ipv4_present",
+      **concurrent_options
+
+    add_index :<%= table_name %>, :<%= prefix %>_ipv6,
+      where: "<%= prefix %>_ipv6 IS NOT NULL",
+      name: "idx_<%= table_name %>_<%= prefix %>_ipv6_present",
+      **concurrent_options
+<% end -%>
+
+    # Range constraints (RFC 791: IPv4 0..2^32-1, RFC 4291: IPv6 0..2^128-1).
+    # Both columns can be populated (dual-stack interface).
+<% prefixes.each do |prefix| -%>
+    add_check_constraint :<%= table_name %>,
+      "<%= prefix %>_ipv4 >= 0 AND <%= prefix %>_ipv4 <= 4294967295",
+      name: "chk_<%= prefix %>_ipv4_range",
+      **validate_options
+
+    add_check_constraint :<%= table_name %>,
+      "<%= prefix %>_ipv6 >= 0 AND <%= prefix %>_ipv6 <= 340282366920938463463374607431768211455",
+      name: "chk_<%= prefix %>_ipv6_range",
+      **validate_options
+<% end -%>
+  end
+
+  private
+
+  def concurrent_options
+    opts = { if_not_exists: true }
+    opts[:algorithm] = :concurrently if postgresql?
+    opts
+  end
+
+  def validate_options
+    postgresql? ? { validate: false } : {}
+  end
+
+  def postgresql?
+    connection.adapter_name == "PostgreSQL"
+  end
+end
