@@ -1,0 +1,9 @@
+.git
+.github
+coverage
+pkg
+tmp
+rdoc
+*.gem
+.DS_Store
+Gemfile.lock
