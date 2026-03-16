@@ -105,6 +105,23 @@ RSpec.describe IpAttribute::ActiveRecordIntegration do
       expect(session.read_attribute(:client_ipv6)).to be_nil
     end
 
+    it "rejects IPv6 in _ipv4 writer (stores nil)" do
+      session.client_ipv4 = "2001:db8::1"
+      expect(session.read_attribute(:client_ipv4)).to be_nil
+    end
+
+    it "rejects IPv4 in _ipv6 writer (stores nil)" do
+      session.client_ipv6 = "192.168.0.1"
+      expect(session.read_attribute(:client_ipv6)).to be_nil
+    end
+
+    it "stores nil for invalid input in both writers" do
+      session.client_ipv4 = "wuff"
+      session.client_ipv6 = "wuff"
+      expect(session.read_attribute(:client_ipv4)).to be_nil
+      expect(session.read_attribute(:client_ipv6)).to be_nil
+    end
+
     it "supports dual-stack (both populated)" do
       session.client_ipv4 = "192.168.0.50"
       session.client_ipv6 = "2001:db8::50"
