@@ -1,0 +1,29 @@
+class <%= migration_class_name %> < ActiveRecord::Migration[<%= ActiveRecord::Migration.current_version %>]
+  disable_ddl_transaction!
+
+  def change
+<% prefixes.each do |prefix| -%>
+    add_index :<%= table_name %>, :<%= prefix %>_ipv4,
+      where: "<%= prefix %>_ipv4 IS NOT NULL",
+      name: "idx_<%= table_name %>_<%= prefix %>_ipv4_present",
+      **concurrent_options
+
+    add_index :<%= table_name %>, :<%= prefix %>_ipv6,
+      where: "<%= prefix %>_ipv6 IS NOT NULL",
+      name: "idx_<%= table_name %>_<%= prefix %>_ipv6_present",
+      **concurrent_options
+<% end -%>
+  end
+
+  private
+
+  def concurrent_options
+    opts = { if_not_exists: true }
+    opts[:algorithm] = :concurrently if postgresql?
+    opts
+  end
+
+  def postgresql?
+    connection.adapter_name == "PostgreSQL"
+  end
+end
