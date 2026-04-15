@@ -1,6 +1,7 @@
 # CI — lint, test matrix, audit.
 #
 # Actions pinned to full SHA for supply-chain safety.
+# Node 24 actions (v5+) — Node 20 deprecated June 2026.
 # Concurrency: cancel stale runs on same branch/PR.
 #
 # Matrix: Ruby 3.4 + 4.0 × ActiveRecord 7.2 + 8.1
@@ -38,12 +39,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - uses: ruby/setup-ruby@4a9ddd6f338a97768b8006bf671dfbad383215f4 # v1.207.0
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: ruby/setup-ruby@7372622e62b60b3cb750dcd2b9e32c247ffec26a # v1.302.0
         with:
           ruby-version: "3.4"
           bundler-cache: true
       - run: bundle exec standardrb --no-fix
+      - run: bundle exec reek lib/
 
   test:
     runs-on: ubuntu-latest
@@ -54,30 +56,24 @@ jobs:
         ruby: ["3.4", "4.0"]
         ar: ["7.2", "8.1"]
         exclude:
-          # AR 7.2 is not tested against Ruby 4.0
-          # (Rails 7.2 predates Ruby 4.0 release)
           - ruby: "4.0"
             ar: "7.2"
     env:
       AR_VERSION: ${{ matrix.ar }}
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - uses: ruby/setup-ruby@4a9ddd6f338a97768b8006bf671dfbad383215f4 # v1.207.0
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: ruby/setup-ruby@7372622e62b60b3cb750dcd2b9e32c247ffec26a # v1.302.0
         with:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
-      - run: |
-          echo "Ruby: $(ruby -v)"
-          echo "AR_VERSION: $AR_VERSION"
-          bundle exec ruby -e "puts ActiveRecord::VERSION::STRING" 2>/dev/null || true
       - run: bundle exec rspec
 
   audit:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - uses: ruby/setup-ruby@4a9ddd6f338a97768b8006bf671dfbad383215f4 # v1.207.0
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: ruby/setup-ruby@7372622e62b60b3cb750dcd2b9e32c247ffec26a # v1.302.0
         with:
           ruby-version: "3.4"
           bundler-cache: true

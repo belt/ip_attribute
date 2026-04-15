@@ -175,7 +175,7 @@ for all addresses including `::1` vs `0.0.0.1`.
 
 ## Requirements
 
-- Ruby >= 3.4.9
+- Ruby >= 3.4.0
 - ActiveRecord >= 7.2 (for AR integration)
 
 Tested: Ruby 3.4 + 4.0 × ActiveRecord 7.2 + 8.1.
