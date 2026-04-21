@@ -1,0 +1,145 @@
+name: Bug Report
+description: Report a bug or unexpected behavior in ip_attribute
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reporting a bug. Please fill out the
+        sections below so we can reproduce and fix the issue.
+
+  - type: input
+    id: gem-version
+    attributes:
+      label: ip_attribute Version
+      description: From `Gemfile.lock` or `bundle show ip_attribute`
+      placeholder: "0.2.0"
+    validations:
+      required: true
+
+  - type: input
+    id: ruby-version
+    attributes:
+      label: Ruby Version
+      description: Output of `ruby -v`
+      placeholder: "ruby 3.4.1"
+    validations:
+      required: true
+
+  - type: input
+    id: rails-version
+    attributes:
+      label: Rails / ActiveRecord Version
+      description: From `Gemfile.lock` (rails or activerecord line)
+      placeholder: "activerecord 7.2.1"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: database
+    attributes:
+      label: Database
+      options:
+        - PostgreSQL
+        - MySQL / MariaDB
+        - SQLite
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: storage-strategy
+    attributes:
+      label: Storage Strategy
+      description: Which column layout are you using?
+      options:
+        - "Strategy A: dual column (_ipv4 + _ipv6)"
+        - "Strategy B: single column + family (_ip + _ip_family)"
+        - "Strategy B: single column only (_ip, no family)"
+        - "ActiveModel::Type only (no database)"
+        - Not sure / mixed
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating System
+      options:
+        - macOS
+        - Linux
+        - Windows
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What happened? What did you expect instead?
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: |
+        Minimal steps to trigger the bug. Include schema,
+        model, and the exact code that produces the issue.
+      render: ruby
+      placeholder: |
+        # Schema
+        create_table :sessions do |t|
+          t.bigint :client_ipv4
+          t.decimal :client_ipv6, precision: 39, scale: 0
+        end
+
+        # Model
+        class Session < ActiveRecord::Base
+          include IpAttribute::ActiveRecordIntegration
+        end
+
+        # Trigger
+        s = Session.new(client_ip: "::1")
+        s.client_ip.to_s  # expected: "::1", got: ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: error-output
+    attributes:
+      label: Error Output / Stack Trace
+      description: Full error message and backtrace, if any.
+      render: text
+
+  - type: textarea
+    id: input-sample
+    attributes:
+      label: IP Input Sample
+      description: |
+        If the bug involves a specific IP value, paste it here
+        verbatim (preserves edge cases like leading zeros,
+        IPv4-mapped IPv6, zone IDs).
+      render: text
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: |
+        Anything else that might help: subnet queries used,
+        custom column naming, related issues, workarounds tried.
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Pre-submission checklist
+      options:
+        - label: I have searched existing issues for similar problems
+          required: true
+        - label: I have tested with the latest version of ip_attribute
+          required: true
+        - label: I have included a minimal reproduction
+          required: true

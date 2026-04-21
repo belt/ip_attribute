@@ -1,0 +1,67 @@
+name: Question
+description: Ask a question about using ip_attribute
+labels: ["question"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Have a question? Consider opening a
+        [Discussion](https://github.com/belt/ip_attribute/discussions)
+        for usage questions and ideas. Use this template if you
+        prefer issues or your question is more bug-adjacent.
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Question
+      description: What are you trying to figure out?
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: |
+        What are you trying to accomplish? What have you tried
+        so far? Include relevant code, schema, or configuration.
+      render: ruby
+    validations:
+      required: true
+
+  - type: input
+    id: gem-version
+    attributes:
+      label: ip_attribute Version
+      placeholder: "0.2.0"
+    validations:
+      required: true
+
+  - type: input
+    id: ruby-version
+    attributes:
+      label: Ruby Version
+      placeholder: "ruby 3.4.1"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: storage-strategy
+    attributes:
+      label: Storage Strategy (if relevant)
+      options:
+        - "Strategy A: dual column (_ipv4 + _ipv6)"
+        - "Strategy B: single column + family"
+        - "Strategy B: single column only"
+        - "ActiveModel::Type only"
+        - Not applicable
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Pre-submission checklist
+      options:
+        - label: I have read the README and CHANGELOG
+          required: true
+        - label: I have searched existing issues and discussions
+          required: true
