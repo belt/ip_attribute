@@ -8,7 +8,6 @@ target "matrix" {
   name = "ruby-${replace(item.ruby, ".", "-")}-ar-${replace(item.ar, ".", "-")}"
   matrix = {
     item = [
-      { ruby = "3.4.9", ar = "7.2" },
       { ruby = "3.4.9", ar = "8.1" },
       { ruby = "4.0.1", ar = "8.1" }
     ]

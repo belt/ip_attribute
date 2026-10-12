@@ -5,7 +5,7 @@
 #
 # Usage:
 #   docker compose run --rm test
-#   AR_VERSION=7.2 docker compose run --rm test
+#   AR_VERSION=8.1 docker compose run --rm test
 #
 # Matrix builds via docker-bake.hcl or CI workflow.
 ARG RUBY_VERSION=3.4.9

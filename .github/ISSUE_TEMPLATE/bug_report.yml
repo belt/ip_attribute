@@ -31,7 +31,7 @@ body:
     attributes:
       label: Rails / ActiveRecord Version
       description: From `Gemfile.lock` (rails or activerecord line)
-      placeholder: "activerecord 7.2.1"
+      placeholder: "activerecord 8.1.4"
     validations:
       required: true
 
