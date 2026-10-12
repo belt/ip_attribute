@@ -2,8 +2,8 @@
 
 require "simplecov"
 SimpleCov.start do
-  add_filter "/spec/"
-  add_filter "/lib/generators/"
+  skip "/spec/"
+  skip "/lib/generators/"
   enable_coverage :branch
   # Branch coverage threshold lower than line because SimpleCov
   # counts &. (safe navigation) as branches — inflates denominator.
