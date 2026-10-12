@@ -4,7 +4,7 @@ source "https://rubygems.org"
 
 gemspec
 
-# CI matrix: AR_VERSION=7.2 or AR_VERSION=8.1 (default: latest)
+# CI matrix: AR_VERSION=8.1 (default: latest)
 ar_version = ENV.fetch("AR_VERSION", nil)
 if ar_version
   gem "activerecord", "~> #{ar_version}.0"

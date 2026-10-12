@@ -50,8 +50,8 @@ IpAttribute handles IP addresses, which can be sensitive in certain contexts:
 ### Dependencies
 
 All dependencies are regularly updated:
-- ActiveRecord >= 7.2
-- ActiveSupport >= 7.2
+- ActiveRecord >= 8.1
+- ActiveSupport >= 8.1
 
 Run `bundle audit` to check for known vulnerabilities in dependencies.
 
